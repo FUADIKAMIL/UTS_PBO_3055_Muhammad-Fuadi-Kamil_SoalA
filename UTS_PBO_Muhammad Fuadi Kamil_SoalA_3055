@@ -1,0 +1,250 @@
+using System;
+
+public abstract class Buku
+{
+    public string Judul { get; set; }
+    public string Penulis { get; set; }
+    public int TahunTerbit { get; set; }
+
+    public Buku(string judul, string penulis, int tahun)
+    {
+        Judul = judul;
+        Penulis = penulis;
+        TahunTerbit = tahun;
+    }
+
+    public abstract void LihatInfo();
+}
+
+public class Fiksi : Buku
+{
+    public Fiksi(string judul, string penulis, int tahun) : base(judul, penulis, tahun) { }
+
+    public override void LihatInfo()
+    {
+        Console.WriteLine($"[Fiksi] {Judul} - {Penulis} ({TahunTerbit})");
+    }
+}
+
+public class NonFiksi : Buku
+{
+    public NonFiksi(string judul, string penulis, int tahun) : base(judul, penulis, tahun) { }
+
+    public override void LihatInfo()
+    {
+        Console.WriteLine($"[Non-Fiksi] {Judul} - {Penulis} ({TahunTerbit})");
+    }
+}
+
+public class Majalah : Buku
+{
+    public Majalah(string judul, string penulis, int tahun) : base(judul, penulis, tahun) { }
+
+    public override void LihatInfo()
+    {
+        Console.WriteLine($"[Majalah] {Judul} - {Penulis} ({TahunTerbit})");
+    }
+}
+
+public class Petugas
+{
+    private Buku[] daftarBuku = new Buku[100];
+    private int jumlahBuku = 0;
+
+    private Buku[] daftarPinjam = new Buku[3];
+    private int jumlahPinjam = 0;
+
+    public void TambahBuku(Buku buku)
+    {
+        if (jumlahBuku < daftarBuku.Length)
+        {
+            daftarBuku[jumlahBuku++] = buku;
+            Console.WriteLine("Buku berhasil ditambahkan.");
+        }
+        else
+        {
+            Console.WriteLine("Kapasitas buku penuh.");
+        }
+    }
+
+    public void UbahBuku(string judulLama, string judulBaru, string penulisBaru, int tahunBaru)
+    {
+        for (int i = 0; i < jumlahBuku; i++)
+        {
+            if (daftarBuku[i].Judul == judulLama)
+            {
+                daftarBuku[i].Judul = judulBaru;
+                daftarBuku[i].Penulis = penulisBaru;
+                daftarBuku[i].TahunTerbit = tahunBaru;
+                Console.WriteLine("Buku berhasil diubah.");
+                return;
+            }
+        }
+        Console.WriteLine("Buku tidak ditemukan.");
+    }
+
+    public void LihatSemuaBuku()
+    {
+        Console.WriteLine("\nDaftar Buku:");
+        if (jumlahBuku == 0)
+        {
+            Console.WriteLine("Belum ada buku.");
+            return;
+        }
+        for (int i = 0; i < jumlahBuku; i++)
+        {
+            daftarBuku[i].LihatInfo();
+        }
+    }
+
+    public void PinjamBuku(string judul)
+    {
+        if (jumlahPinjam >= 3)
+        {
+            Console.WriteLine("Maksimal pinjam 3 buku.");
+            return;
+        }
+
+        for (int i = 0; i < jumlahBuku; i++)
+        {
+            if (daftarBuku[i].Judul == judul)
+            {
+                daftarPinjam[jumlahPinjam++] = daftarBuku[i];
+
+                for (int j = i; j < jumlahBuku - 1; j++)
+                {
+                    daftarBuku[j] = daftarBuku[j + 1];
+                }
+                jumlahBuku--;
+
+                Console.WriteLine("Buku berhasil dipinjam.");
+                return;
+            }
+        }
+
+        Console.WriteLine("Buku tidak ditemukan.");
+    }
+
+    public void KembaliBuku(string judul)
+    {
+        for (int i = 0; i < jumlahPinjam; i++)
+        {
+            if (daftarPinjam[i].Judul == judul)
+            {
+                if (jumlahBuku < daftarBuku.Length)
+                {
+                    daftarBuku[jumlahBuku++] = daftarPinjam[i];
+                }
+
+                for (int j = i; j < jumlahPinjam - 1; j++)
+                {
+                    daftarPinjam[j] = daftarPinjam[j + 1];
+                }
+                jumlahPinjam--;
+
+                Console.WriteLine("Buku berhasil dikembalikan.");
+                return;
+            }
+        }
+        Console.WriteLine("Buku tidak ditemukan dalam pinjaman.");
+    }
+
+    public void LihatPinjaman()
+    {
+        Console.WriteLine("\nBuku yang Dipinjam:");
+        if (jumlahPinjam == 0)
+        {
+            Console.WriteLine("Belum ada buku yang dipinjam.");
+            return;
+        }
+        for (int i = 0; i < jumlahPinjam; i++)
+        {
+            daftarPinjam[i].LihatInfo();
+        }
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        Petugas petugas = new Petugas();
+
+        while (true)
+        {
+            Console.WriteLine("\nSelamat Datang di Perpustakaan Mini");
+            Console.WriteLine("1. Tambah Buku");
+            Console.WriteLine("2. Ubah Buku");
+            Console.WriteLine("3. Lihat Semua Buku");
+            Console.WriteLine("4. Pinjam Buku");
+            Console.WriteLine("5. Kembalikan Buku");
+            Console.WriteLine("6. Lihat Buku yang Dipinjam");
+            Console.WriteLine("0. Keluar");
+            Console.Write("Pilih menu: ");
+            string menu = Console.ReadLine();
+
+            if (menu == "0") break;
+
+            switch (menu)
+            {
+                case "1":
+                    Console.Write("Judul: ");
+                    string judul = Console.ReadLine();
+                    Console.Write("Penulis: ");
+                    string penulis = Console.ReadLine();
+                    Console.Write("Tahun Terbit: ");
+                    int tahun = int.Parse(Console.ReadLine());
+                    Console.Write("Jenis (Fiksi / NonFiksi / Majalah): ");
+                    string jenis = Console.ReadLine().ToLower();
+
+                    if (jenis == "fiksi")
+                        petugas.TambahBuku(new Fiksi(judul, penulis, tahun));
+                    else if (jenis == "nonfiksi")
+                        petugas.TambahBuku(new NonFiksi(judul, penulis, tahun));
+                    else if (jenis == "majalah")
+                        petugas.TambahBuku(new Majalah(judul, penulis, tahun));
+                    else
+                        Console.WriteLine("Jenis tidak dikenali.");
+                    break;
+
+                case "2":
+                    Console.Write("Judul lama: ");
+                    string judulLama = Console.ReadLine();
+                    Console.Write("Judul baru: ");
+                    string judulBaru = Console.ReadLine();
+                    Console.Write("Penulis baru: ");
+                    string penulisBaru = Console.ReadLine();
+                    Console.Write("Tahun terbit baru: ");
+                    int tahunBaru = int.Parse(Console.ReadLine());
+                    petugas.UbahBuku(judulLama, judulBaru, penulisBaru, tahunBaru);
+                    break;
+
+                case "3":
+                    petugas.LihatSemuaBuku();
+                    break;
+
+                case "4":
+                    Console.Write("Judul buku yang ingin dipinjam: ");
+                    string pinjam = Console.ReadLine();
+                    petugas.PinjamBuku(pinjam);
+                    break;
+
+                case "5":
+                    Console.Write("Judul buku yang ingin dikembalikan: ");
+                    string kembali = Console.ReadLine();
+                    petugas.KembaliBuku(kembali);
+                    break;
+
+                case "6":
+                    petugas.LihatPinjaman();
+                    break;
+
+                default:
+                    Console.WriteLine("Menu tidak valid.");
+                    break;
+            }
+        }
+
+        Console.WriteLine("Terima kasih telah menggunakan sistem.");
+    }
+}
